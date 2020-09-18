@@ -62,7 +62,7 @@ exports.getCustomers = async (req, res, next) => {
             throw error;
         }
 
-        res.json(customer);
+        res.json(customers);
 
     } catch (err) {
         if (!err.statusCode) {

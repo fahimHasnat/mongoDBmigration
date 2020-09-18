@@ -7,6 +7,7 @@ const app = express();
 
 ///Routes
 const Example = require('./routes/example');
+const { resolve } = require('bluebird');
 
 ///Middleware
 app.use(bodyParser.json());
@@ -36,15 +37,33 @@ app.use((error, req, res, next) => {
     res.status(status).json({ message: message, data: data });
 });
 
+const migrations = async () => {
+    return new Promise((resolve, reject) => {
+        const migrate = require('./migrations/add-year-of-birth');
+        migrate.down().then((message) => {
+            resolve(message);
+        }).catch(err => {
+            reject(err);
+        })
+    })
+}
+
 mongoose.connect(`${process.env.mongodbURI}`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
     useCreateIndex: true
-}).then(() => {
+}).then(async () => {
     console.log("Databse Connection Established");
+
+    const message = await migrations();
+    console.log(message);
+
     app.listen(process.env.PORT, () => {
         console.log(`The server is running on port ${process.env.PORT}`);
     });
+}).catch(err => {
+    console.error(err);
 })
+
 mongoose.Promise = global.Promise;
