@@ -7,7 +7,6 @@ const app = express();
 
 ///Routes
 const Example = require('./routes/example');
-const { resolve } = require('bluebird');
 
 ///Middleware
 app.use(bodyParser.json());
