@@ -36,17 +36,8 @@ app.use((error, req, res, next) => {
     res.status(status).json({ message: message, data: data });
 });
 
-const migrations = async () => {
-    return new Promise((resolve, reject) => {
-        const migrate = require('./migrations/add-year-of-birth');
-        migrate.down().then((message) => {
-            resolve(message);
-        }).catch(err => {
-            reject(err);
-        })
-    })
-}
-
+const migrations = require('./mongoDbmigration').migrations;
+let seperators = "------------------------------";
 mongoose.connect(`${process.env.mongodbURI}`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -54,11 +45,16 @@ mongoose.connect(`${process.env.mongodbURI}`, {
     useCreateIndex: true
 }).then(async () => {
     console.log("Databse Connection Established");
+    console.log(seperators);
 
-    const message = await migrations();
+    const message = await migrations("up", ['add-last-name']);
+    // const message = await migrations("up");
+
+    console.log();
     console.log(message);
 
     app.listen(process.env.PORT, () => {
+        console.log(seperators);
         console.log(`The server is running on port ${process.env.PORT}`);
     });
 }).catch(err => {

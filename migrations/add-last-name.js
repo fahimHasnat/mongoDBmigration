@@ -23,25 +23,21 @@ module.exports.up = async () => {
 
 module.exports.down = async (next) => {
     try {
-        try {
-            const customers = await Customer.find({ last_name: { $exists: true } });
-            if (customers.length != 0) {
-                customers.map(async result => {
-                    const { first_name, last_name } = result._doc;
-                    const name = first_name.concat(" ", last_name);
+        const customers = await Customer.find({ last_name: { $exists: true } });
+        if (customers.length != 0) {
+            customers.map(async result => {
+                const { first_name, last_name } = result._doc;
+                const name = first_name.concat(" ", last_name);
 
-                    await Customer.updateOne({ _id: result._doc._id }, { $unset: { "first_name": "", "last_name": "" }, $set: { "name": name } });
-                });
-                return 'Customer names has been updated';
-            }
-            return 'All customers have already updated value';
-
-
-
-        } catch (err) {
-            throw err;
+                await Customer.updateOne({ _id: result._doc._id }, { $unset: { "first_name": "", "last_name": "" }, $set: { "name": name } });
+            });
+            return 'Customer names has been updated';
         }
+        return 'All customers have already updated value';
+
+
+
     } catch (err) {
-        next(err);
+        throw err;
     }
 }
